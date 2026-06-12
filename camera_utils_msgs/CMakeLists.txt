@@ -1,36 +1,20 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.8)
 project(camera_utils_msgs)
-
-# Default to C++14
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
-endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+find_package(ament_cmake REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
-find_package(catkin REQUIRED COMPONENTS
-  sensor_msgs
-  std_msgs
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/Frames.msg"
+  DEPENDENCIES std_msgs sensor_msgs
 )
 
-find_package(message_generation REQUIRED)
+ament_export_dependencies(rosidl_default_runtime)
 
-add_message_files(
-  FILES
-  Frames.msg
-)
-
-generate_messages(
-  DEPENDENCIES
-  sensor_msgs
-  std_msgs
-)
-
-catkin_package(
-  CATKIN_DEPENDS message_runtime
-)
-
-
+ament_package()
