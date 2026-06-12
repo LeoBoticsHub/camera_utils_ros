@@ -4,27 +4,28 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 
+
 def generate_launch_description():
 
     args = [
-        DeclareLaunchArgument("rgb_topic",                  default_value="rgb_image"),
-        DeclareLaunchArgument("depth_topic",                default_value="depth_image"),
-        DeclareLaunchArgument("camera_info_topic",          default_value="camera_info"),
-        DeclareLaunchArgument("camera_pcd_topic",           default_value="camera_pcd"),
-        DeclareLaunchArgument("frames_topic",               default_value="camera_frames"),
-        DeclareLaunchArgument("publish_separated_frames",   default_value="true"),
-        DeclareLaunchArgument("camera_resolution",          default_value="HD"),
-        DeclareLaunchArgument("compressed_image",           default_value="true"),
-        DeclareLaunchArgument("fps",                        default_value="30"),
-        DeclareLaunchArgument("serial_number",              default_value=""),
-        DeclareLaunchArgument("publish_rgb",                default_value="true"),
-        DeclareLaunchArgument("publish_depth",              default_value="true"),
-        DeclareLaunchArgument("publish_camera_info",        default_value="true"),
-        DeclareLaunchArgument("camera_type",                default_value="zed"),
-        DeclareLaunchArgument("device_idx",                 default_value="0"),
+        DeclareLaunchArgument("rgb_topic", default_value="/camera/rgb_image"),
+        DeclareLaunchArgument("depth_topic", default_value="/camera/depth_image"),
+        DeclareLaunchArgument("camera_info_topic", default_value="/camera/camera_info"),
+        DeclareLaunchArgument("camera_pcd_topic", default_value="/camera/camera_pcd"),
+        DeclareLaunchArgument("frames_topic", default_value="/camera/camera_frames"),
+        DeclareLaunchArgument("publish_separated_frames", default_value="true"),
+        DeclareLaunchArgument("camera_resolution", default_value="HD"),
+        DeclareLaunchArgument("compressed_image", default_value="false"),
+        DeclareLaunchArgument("fps", default_value="30"),
+        DeclareLaunchArgument("serial_number", default_value=""),
+        DeclareLaunchArgument("publish_rgb", default_value="true"),
+        DeclareLaunchArgument("publish_depth", default_value="true"),
+        DeclareLaunchArgument("publish_camera_info", default_value="true"),
+        DeclareLaunchArgument("camera_type", default_value="zed"),
+        DeclareLaunchArgument("device_idx", default_value="0"),
         # QoS dei topic immagine: "best_effort" (consigliato per stream ad alto rate) | "reliable"
-        DeclareLaunchArgument("reliability",                default_value="best_effort"),
-        DeclareLaunchArgument("qos_depth",                  default_value="5"),
+        DeclareLaunchArgument("reliability", default_value="best_effort"),
+        DeclareLaunchArgument("qos_depth", default_value="5"),
     ]
 
     # le LaunchConfiguration sono SEMPRE stringhe: int/bool vanno wrappati con

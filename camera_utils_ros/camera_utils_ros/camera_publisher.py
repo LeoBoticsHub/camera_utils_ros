@@ -126,20 +126,36 @@ class CameraPublisher(Node):
         self.camera_info_publisher = None
         self.frames_publisher = None
 
+        # --- conversione RGB ---
+        # La RGB può essere compressa (jpg) o raw a seconda del parametro.
+        self.rgb_cv2_to_imgmsg = self.bridge.cv2_to_imgmsg
+        self.rgb_encoding = "bgr8"
+
+        # --- conversione Depth ---
+        # La depth viaggia SEMPRE come Image raw (sensor_msgs/Image), indipendentemente
+        # da compressed_image. CompressedImage con encoding lossy (jpg) corromperebbe i
+        # valori metrici; png lossless è supportato da cv_bridge ma non da tutti i
+        # visualizzatori ROS 2. La scelta più robusta e compatibile è tenere la depth raw.
+        self.depth_cv2_to_imgmsg = self.bridge.cv2_to_imgmsg
+        # depth_encoding rimane invariato (mono16 / 32FC1)
+
         image_type = Image
+        depth_image_type = Image  # la depth è sempre Image raw
 
         if self.compressed_image:
             image_type = CompressedImage
             rgb_topic += "/compressed"
+            self.rgb_cv2_to_imgmsg = self.bridge.cv2_to_compressed_imgmsg
+            self.rgb_encoding = "jpg"
 
         if self.publish_depth and self.publish_rgb:
             if self.publish_separated_frames:
-                self.depth_publisher = self.create_publisher(image_type, depth_topic, image_qos)
+                self.depth_publisher = self.create_publisher(depth_image_type, depth_topic, image_qos)
                 self.rgb_publisher = self.create_publisher(image_type, rgb_topic, image_qos)
             else:
                 self.frames_publisher = self.create_publisher(Frames, frames_topic, image_qos)
         elif self.publish_depth:
-            self.depth_publisher = self.create_publisher(image_type, depth_topic, image_qos)
+            self.depth_publisher = self.create_publisher(depth_image_type, depth_topic, image_qos)
         elif self.publish_rgb:
             self.rgb_publisher = self.create_publisher(image_type, rgb_topic, image_qos)
 
@@ -160,12 +176,6 @@ class CameraPublisher(Node):
         except KeyError:
             pass
 
-        self.rgb_cv2_to_imgmsg = self.bridge.cv2_to_imgmsg
-        self.rgb_encoding = "bgr8"
-        if self.compressed_image:
-            self.rgb_cv2_to_imgmsg = self.bridge.cv2_to_compressed_imgmsg
-            self.rgb_encoding = "jpg"
-
     def run(self):
         while rclpy.ok():
 
@@ -175,7 +185,7 @@ class CameraPublisher(Node):
                 rgb, depth = self.camera.get_frames()
 
                 rgb_image = self.rgb_cv2_to_imgmsg(rgb, self.rgb_encoding)
-                depth_image = self.bridge.cv2_to_imgmsg(depth, self.depth_encoding)
+                depth_image = self.depth_cv2_to_imgmsg(depth, self.depth_encoding)
 
                 rgb_image.header.stamp = t
                 depth_image.header.stamp = t
@@ -201,7 +211,7 @@ class CameraPublisher(Node):
             elif self.publish_depth:
                 depth = self.camera.get_depth()
 
-                depth_image = self.bridge.cv2_to_imgmsg(depth, self.depth_encoding)
+                depth_image = self.depth_cv2_to_imgmsg(depth, self.depth_encoding)
                 depth_image.header.stamp = t
                 self.depth_publisher.publish(depth_image)
 
